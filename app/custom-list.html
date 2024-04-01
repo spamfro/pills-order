@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Custom Element</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      // MDN: https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots
+
+      class ListElement extends HTMLElement {
+        // register helper ...
+        static registerCustomElement() {
+          ListElement.template = document.createElement('template');
+          ListElement.template.innerHTML = `
+            <style>
+              .d-none {
+                display: none; 
+              }
+            </style>
+            <div>
+              <slot></slot>
+            </div>
+          `;
+          window.customElements.define('x-list', ListElement);
+        }
+        
+        // Web componenets methods ...
+        constructor() {
+          super();
+          const shadowRoot = this.attachShadow({ mode: 'open' });
+          shadowRoot.appendChild(ListElement.template.content.cloneNode(true));
+        }
+        // static observedAttributes = ['name',...];
+        // attributeChangedCallback(name, oldVal, newVal) { ... }
+        // connectedCallback() { ... }
+        // disconnectedCallback() { ... }
+
+        // custom methods...
+        get items() { 
+          return this.querySelectorAll('x-list-item');
+        }
+        render({ visible }) {
+          if (visible !== undefined) {
+            this.shadowRoot.querySelector('div').classList.toggle('d-none', !visible);
+          }
+        }
+      }
+
+      class ListItemElement extends HTMLElement {
+        // register helper ...
+        static registerCustomElement() {
+          ListItemElement.template = document.createElement('template');
+          ListItemElement.template.innerHTML = `
+            <div>
+              <p class="label"></p>
+              <slot></slot>
+            </div>
+          `;
+          window.customElements.define('x-list-item', ListItemElement);
+        }
+        
+        // Web componenets methods ...
+        constructor() {
+          super();
+          // const shadowRoot = this.attachShadow({ mode: 'open' });
+          // shadowRoot.appendChild(ListItemElement.template.content.cloneNode(true));
+          // this.el = shadowRoot.querySelector('div');
+
+          // this.appendChild(ListItemElement.template.content.cloneNode(true));
+
+          // [document.createElement('p')].forEach(p => {
+          //   p.textContent = 'test';
+          //   this.appendChild(p);
+          // });
+        }
+        static observedAttributes = ['label'];
+        attributeChangedCallback(name, oldVal, newVal) { 
+          render({ [name]: newVal });
+        }
+        // connectedCallback() { 
+        //   [document.createElement('p')].forEach(p => {
+        //     p.textContent = 'test';
+        //     this.appendChild(p); 
+        //   });
+        // }
+        // disconnectedCallback() { ... }
+
+        // custom methods...
+        get label() { return this.getAttribute('label') }
+        set label(val) { return this.setAttribute('label', val) }
+        render({ label, visible }) {
+          // if (label !== undefined) {
+          //   [this.el.querySelector('p')].forEach(p => {
+          //     p.textContent = label.toString();
+          //   });
+          // }
+          // if (visible !== undefined) {
+          //   this.el.classList.toggle('d-none', !visible);
+          // }
+        }
+      }
+
+      ListElement.registerCustomElement();
+      ListItemElement.registerCustomElement();
+      
+    </script>
+  </head>
+  <body>
+    <x-list>
+      <x-list-item>Some text</x-list-item>
+      <x-list-item>More text</x-list-item>
+    </x-list>
+  </body>
+</html>

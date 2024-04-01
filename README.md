@@ -1,0 +1,38 @@
+# Pills order
+
+## Run the app locally
+
+### Install live certificates
+```
+openssl enc -aes-128-cbc -pbkdf2 -salt -d -in ~/ws-archive/certs.tar.gz.enc | tar xzv
+```
+### Start web server in Docker
+```
+docker container run --rm \
+  --name node-app \
+  --network bridge-dev \
+  --ip 172.20.0.100 \
+  --user node \
+  --workdir /home/node \
+  --volume "$PWD/app:/home/node/app" \
+  --volume "$PWD/certs:/home/node/certs" \
+  --publish 3443:3443 \
+  -d node npx http-server ./app -c-1 --ssl -p 3443 --cert ./certs/cert.pem --key ./certs/cert-key-nopassword.pem
+
+```
+Open site at https://xps.spamfro.site:3443 (in LAN) or https://local.spamfro.site:3443 (with forward proxy)
+
+## Run the app in GitHub pages
+
+### Push source subtree into GitHub
+```
+git subtree split -P playground/pills-order -b github/pills-order
+git push git@github.com:spamfro/pills-order.git github/pills-order:main
+```
+
+### Deploy to GitHub pages
+```
+git subtree split -P playground/pills-order/app -b gh-pages/pills-order
+git push git@github.com:spamfro/pills-order.git gh-pages/pills-order:gh-pages
+```
+Open site at https://spamfro.site/pills-order
