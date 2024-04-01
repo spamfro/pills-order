@@ -111,8 +111,8 @@ class ProductsDataset {
       } catch {
         // noop
       }
-      this.rows = rows;
     }
+    this.rows = rows;
   }
 }
 
@@ -138,8 +138,8 @@ class InventoryDataset {
       } catch {
         // noop
       }
-      this.rows = rows;
     }
+    this.rows = rows;
   }
 }
 
@@ -182,8 +182,8 @@ class Services {
     this.products = new Products();
   }
   async init() {
-    const [inventory] = [new Inventory({ indexedDB: window.indexedDB }).open()];  // start all
-    this.inventory = await inventory;
+    const [localDb] = [new LocalDb({ indexedDB: window.indexedDB }).open()];  // start all
+    this.localDb = await localDb;
     return this;
   }
 }
@@ -199,7 +199,7 @@ class Products {
   }
 }
 
-class Inventory {
+class LocalDb {
   constructor({ indexedDB }) {
     this.indexedDB = indexedDB;
   }
@@ -208,14 +208,14 @@ class Inventory {
       db.createObjectStore('Inventory', { keyPath: 'ID' });
     };
     this.db = await new Promise((resolve, reject) => {
-      const req = this.indexedDB.open('Inventory', 1);
+      const req = this.indexedDB.open('LocalDb', 1);
       req.onerror = () => { reject(req.error) };
       req.onsuccess = () => { resolve(req.result) };
       req.onupgradeneeded = (event) => { upgrade(req.result, event) };
     });
     return this;
   }
-  async fetch() {
+  async fetchInventory() {
     return new Promise((resolve, reject) => {
       const tr = this.db.transaction(['Inventory'], 'readonly');
       tr.onerror = () => { reject(tr.error) };
@@ -224,7 +224,7 @@ class Inventory {
       req.onsuccess = () => { resolve(req.result) };
     });
   }
-  async put(values) {
+  async putInventory(values) {
     return new Promise((resolve, reject) => {
       const tr = this.db.transaction(['Inventory'], 'readwrite');
       tr.onerror = () => { reject(tr.error) };
@@ -233,7 +233,7 @@ class Inventory {
       values.forEach(({ ID, QTY }) => { store.put({ ID, QTY }) });
     });
   }
-  async delete(ids) {
+  async deleteInventory(ids) {
     return new Promise((resolve, reject) => {
       const tr = this.db.transaction(['Inventory'], 'readwrite');
       tr.onerror = () => { reject(tr.error) };

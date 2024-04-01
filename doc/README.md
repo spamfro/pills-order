@@ -8,20 +8,21 @@
 
 ### Setup services
 ```js
-app.services = await new Services().init({ indexedDB: window.indexedDB })
+app.services = await new Services().init()
 ```
 
 ### Load products
 ```js
-
-values = await app.services.products.fetch()
-app.datasets.products = new ProductsDataset({ values })
+app.datasets.products = new ProductsDataset({
+  values: await app.services.products.fetch()
+})
 ```
 
 ### Load inventory
 ```js
-values = await app.services.inventory.fetch()
-app.datasets.inventory = new InventoryDataset({ values })
+app.datasets.inventory = new InventoryDataset({
+  values: await app.services.localDb.fetchInventory()
+})
 ```
 
 ### Build order
@@ -36,4 +37,21 @@ order = new Order({
 ```js
 app.ui.order = document.createElement('x-order').render({ order })
 document.body.appendChild(app.ui.order)
+```
+
+### Update order
+```js
+app.services.localDb.putInventory([
+  { ID: 3, QTY: 5 },
+  { ID: 6, QTY: 15 },
+])
+app.datasets.inventory = new InventoryDataset({
+  values: await app.services.localDb.fetchInventory()
+})
+app.ui.order.render({ 
+  order: new Order({
+    products: app.datasets.products,
+    inventory: app.datasets.inventory,
+  })
+})
 ```
