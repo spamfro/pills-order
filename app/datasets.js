@@ -1,88 +1,100 @@
 class ProductsDataset {
-  constructor({ values }) {
-    const index = new Map(values[0].map((x, i) => [x, i]));
+  constructor({ schema, values }) {
+    schema = new Map(schema.map((col, idx) => [col, idx]));
     const rows = [];
-    const products = new Map();
-    for (let i = 1; i < values.length; ++i) {
+    const index = new Map();
+    for (let i = 0; i < values.length; ++i) {
       try {
         const value = values[i];
-        const id = parseInt(value[index.get('ID')]);
-        const description = value[index.get('DESCR')];
-        const doses_per_unit = parseInt(value[index.get('DPU')]);
-        const isValidRow = id > 0 && description.length > 0 && doses_per_unit > 0;
+        const id = parseInt(value[schema.get('ID')]);
+        const description = value[schema.get('DESCR')];
+        const dosesPerUnit = parseInt(value[schema.get('DPU')]);
+        const isValidRow = id > 0 && description.length > 0 && dosesPerUnit > 0;
         if (isValidRow) {
-          const row = new ProductRow({ id, description, doses_per_unit });
+          const row = new ProductRow({ id, description, dosesPerUnit });
           rows.push(row);
-          products.set(id, row);
+          index.set(id, row);
         }
       } catch {
         // noop
       }
     }
+    this.schema = schema;
     this.rows = rows;
-    this.products = products;
+    this.index = index;
   }
 }
 
 class ProductRow extends Array {
-  constructor({ id, description, doses_per_unit }) {
-    super(id, description, doses_per_unit);
+  constructor({ id, description, dosesPerUnit }) {
+    super(id, description, dosesPerUnit);
   }
   id() { return this[0] }
   description() { return this[1] }
-  doses_per_unit() { return this[2] }
+  dosesPerUnit() { return this[2] }
 }
 
 class InventoryDataset {
-  constructor({ values }) {
+  constructor({ schema, values, indeces: { products } }) {
+    schema = new Map(schema.map((col, idx) => [col, idx]));
     const rows = [];
+    const index = new Map();
     for (let i = 0; i < values.length; ++i) {
       try {
         const value = values[i];
-        const id = parseInt(value.ID);
-        const available_doses = parseInt(value.QTY);
-        const isValidRow = id > 0 && available_doses >= 0;
-        if (isValidRow) { rows.push(new InventoryRow({ id, available_doses })) }
+        const productId = parseInt(value[schema.get('PID')]);
+        const product = productId && products.get(productId);
+        const availableDoses = parseInt(value[schema.get('QTY')]);
+        const isValidRow = !!product && availableDoses >= 0;
+        if (isValidRow) { 
+          const row = new InventoryRow({ product, availableDoses });
+          rows.push(row);
+          index.set(productId, row);
+        }
       } catch {
         // noop
       }
     }
+    this.schema = schema;
     this.rows = rows;
+    this.index = index;
   }
 }
 
 class InventoryRow extends Array {
-  constructor({ id, available_doses }) {
-    super(id, available_doses);
+  constructor({ product, availableDoses }) {
+    super(product, availableDoses);
   }
-  id() { return this[0] }
-  available_doses() { return this[1] }
+  product() { return this[0] }
+  availableDoses() { return this[1] }
 }
 
 class PrescriptionsDataset {
-  constructor({ values, products }) {
+  constructor({ schema, values, indeces: { products } }) {
+    schema = new Map(schema.map((col, idx) => [col, idx]));
     const rows = [];
-    const prescriptions = new Map();
+    const index = new Map();
     for (let i = 0; i < values.length; ++i) {
       try {
         const value = values[i];
-        const id = parseInt(value.ID);
-        const productId = parseInt(value.PID);
+        const id = parseInt(value[schema.get('ID')]);
+        const productId = parseInt(value[schema.get('PID')]);
         const product = productId && products.get(productId);
-        const prescribedDoses = parseInt(value.QTY);
+        const prescribedDoses = parseInt(value[schema.get('QTY')]);
         const isValidRow = id > 0 && !!product && prescribedDoses >= 0;
         if (isValidRow) { 
           const row = new PrescriptionRow({ id, product, prescribedDoses });
           rows.push(row);
-          const items = prescriptions.get(id) ?? prescriptions.set(id, []).get(id);
+          const items = index.get(id) ?? index.set(id, []).get(id);
           items.push(row);
         }
       } catch {
         // noop
       }
     }
+    this.schema = schema;
     this.rows = rows;
-    this.prescriptions = prescriptions;
+    this.index = index;
   }
 }
 

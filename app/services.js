@@ -12,6 +12,7 @@ class Services {
 }
 
 class Products {
+  static schema =  ['ID', 'DESCR', 'DPU'];
   async fetch() {
     return fetch('data/products.json')
       .then(response => {
@@ -28,8 +29,8 @@ class LocalDb {
   }
   async open() {
     const upgrade = (db, { oldVersion, newVersion }) => {
-      db.createObjectStore('Inventory', { keyPath: 'ID' });
-      db.createObjectStore('Prescriptions', { keyPath: ['ID', 'PID'] });
+      db.createObjectStore('Prescriptions'); // out-of-line key
+      db.createObjectStore('Inventory'); // out-of-line key
     };
     this.db = await new Promise((resolve, reject) => {
       const req = this.indexedDB.open('LocalDb', 1);
@@ -42,6 +43,7 @@ class LocalDb {
 }
 
 class Prescriptions {
+  static schema = ['ID', 'PID', 'QTY'];
   constructor({ localDb }) {
     this.localDb = localDb;
   }
@@ -60,12 +62,13 @@ class Prescriptions {
       tr.onerror = () => { reject(tr.error) };
       tr.oncomplete = () => { resolve() };
       const store = tr.objectStore('Prescriptions');
-      values.forEach(({ ID, PID, QTY }) => { store.put({ ID, PID, QTY }) });
+      values.forEach(([ID, PID, QTY]) => { store.put([ID, PID, QTY], [ID, PID]) });
     });
   }
 }
 
 class Inventory {
+  static schema = ['PID', 'QTY'];
   constructor({ localDb }) {
     this.localDb = localDb;
   }
@@ -84,7 +87,7 @@ class Inventory {
       tr.onerror = () => { reject(tr.error) };
       tr.oncomplete = () => { resolve() };
       const store = tr.objectStore('Inventory');
-      values.forEach(({ ID, QTY }) => { store.put({ ID, QTY }) });
+      values.forEach(([PID, QTY]) => { store.put([PID, QTY], PID) });
     });
   }
   async delete(ids) {

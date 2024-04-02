@@ -7,29 +7,6 @@
 [MDN: row](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableRowElement)  
 
 
-### Demo
-```js
-app.services = await new Services().init()
-app.datasets.products = new ProductsDataset({
-  values: await app.services.products.fetch()
-})
-app.datasets.prescriptions = new PrescriptionsDataset({
-  values: await app.services.prescriptions.fetch(),
-  products: app.datasets.products.products,
-})
-app.datasets.inventory = new InventoryDataset({
-  values: await app.services.inventory.fetch()
-})
-order = new Order({
-  products: app.datasets.products,
-  inventory: app.datasets.inventory,
-})
-app.ui.order = document.createElement('x-order').render({ order })
-document.body.appendChild(app.ui.order)
-```
-
-
-
 ### Setup services
 ```js
 app.services = await new Services().init()
@@ -38,13 +15,14 @@ app.services = await new Services().init()
 ### Load products
 ```js
 app.datasets.products = new ProductsDataset({
+  schema: Products.schema,
   values: await app.services.products.fetch()
 })
 ```
 
-### Load prescriptions
+### Seed sample prescriptions
 ```js
-await app.services.prescriptions.put([
+values = [
   { ID: 1, PID: 1, QTY: 30 },
   { ID: 1, PID: 2, QTY: 15 },
   { ID: 1, PID: 3, QTY: 60 },
@@ -52,50 +30,47 @@ await app.services.prescriptions.put([
   { ID: 1, PID: 5, QTY: 30 },
   { ID: 1, PID: 6, QTY: 9 },
   { ID: 1, PID: 6, QTY: 2 },
-])
+].map(({ ID, PID, QTY }) => [ID, PID, QTY])  // TODO: ref schema
+await app.services.prescriptions.put(values)
+```
 
+### Load prescriptions
+```js
 app.datasets.prescriptions = new PrescriptionsDataset({
+  schema: Prescriptions.schema,
   values: await app.services.prescriptions.fetch(),
-  products: app.datasets.products.products,
+  indeces: { products: app.datasets.products.index }
 })
+```
+
+### Seed sample inventory
+```js
+values = [
+  { PID: 3, QTY: 5 },
+  { PID: 6, QTY: 15 },
+].map(({ PID, QTY }) => [PID, QTY])  // TODO: ref schema
+await app.services.inventory.put(values)
 ```
 
 ### Load inventory
 ```js
-await app.services.inventory.put([
-  { ID: 3, QTY: 5 },
-  { ID: 6, QTY: 15 },
-])
 app.datasets.inventory = new InventoryDataset({
-  values: await app.services.inventory.fetch()
+  schema: Inventory.schema,
+  values: await app.services.inventory.fetch(),
+  indeces: { products: app.datasets.products.index }
 })
 ```
 
-### Build order
+### Build prescription model
 ```js
-order = new Order({
-  products: app.datasets.products,
-  inventory: app.datasets.inventory,
+prescription = new Prescription({
+  prescription: app.datasets.prescriptions.index.get(1),
+  inventory: app.datasets.inventory.index,
 })
 ```
 
-### Orders ui
+### Prescription ui
 ```js
-app.ui.order = document.createElement('x-order').render({ order })
-document.body.appendChild(app.ui.order)
-```
-
-### Update order
-```js
-
-app.ui.order.render({ 
-  order: new Order({
-    products: app.datasets.products,
-    inventory: app.datasets.inventory,
-  })
-})
-```
-### Prescriptions
-```js
-
+app.ui.prescription = document.createElement('x-prescription').render({ prescription })
+document.body.appendChild(app.ui.prescription)
 ```
