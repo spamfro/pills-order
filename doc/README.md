@@ -6,6 +6,30 @@
 [MDN: table](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableElement)  
 [MDN: row](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableRowElement)  
 
+
+### Demo
+```js
+app.services = await new Services().init()
+app.datasets.products = new ProductsDataset({
+  values: await app.services.products.fetch()
+})
+app.datasets.prescriptions = new PrescriptionsDataset({
+  values: await app.services.prescriptions.fetch(),
+  products: app.datasets.products.products,
+})
+app.datasets.inventory = new InventoryDataset({
+  values: await app.services.inventory.fetch()
+})
+order = new Order({
+  products: app.datasets.products,
+  inventory: app.datasets.inventory,
+})
+app.ui.order = document.createElement('x-order').render({ order })
+document.body.appendChild(app.ui.order)
+```
+
+
+
 ### Setup services
 ```js
 app.services = await new Services().init()
@@ -18,10 +42,32 @@ app.datasets.products = new ProductsDataset({
 })
 ```
 
+### Load prescriptions
+```js
+await app.services.prescriptions.put([
+  { ID: 1, PID: 1, QTY: 30 },
+  { ID: 1, PID: 2, QTY: 15 },
+  { ID: 1, PID: 3, QTY: 60 },
+  { ID: 1, PID: 4, QTY: 60 },
+  { ID: 1, PID: 5, QTY: 30 },
+  { ID: 1, PID: 6, QTY: 9 },
+  { ID: 1, PID: 6, QTY: 2 },
+])
+
+app.datasets.prescriptions = new PrescriptionsDataset({
+  values: await app.services.prescriptions.fetch(),
+  products: app.datasets.products.products,
+})
+```
+
 ### Load inventory
 ```js
+await app.services.inventory.put([
+  { ID: 3, QTY: 5 },
+  { ID: 6, QTY: 15 },
+])
 app.datasets.inventory = new InventoryDataset({
-  values: await app.services.localDb.fetchInventory()
+  values: await app.services.inventory.fetch()
 })
 ```
 
@@ -41,17 +87,15 @@ document.body.appendChild(app.ui.order)
 
 ### Update order
 ```js
-app.services.localDb.putInventory([
-  { ID: 3, QTY: 5 },
-  { ID: 6, QTY: 15 },
-])
-app.datasets.inventory = new InventoryDataset({
-  values: await app.services.localDb.fetchInventory()
-})
+
 app.ui.order.render({ 
   order: new Order({
     products: app.datasets.products,
     inventory: app.datasets.inventory,
   })
 })
+```
+### Prescriptions
+```js
+
 ```
