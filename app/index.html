@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Pills order</title>
+    <title>Pills</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="urlpattern-polyfill/index.js" type="module"></script>
+    <script src="urlpattern-polyfill/index.js" type="module" defer></script>
     <script src="app.js" defer></script>
     <script src="datasets.js" defer></script>
     <script src="model.js" defer></script>
     <script src="services.js" defer></script>
+    <script src="ui.js" defer></script>
     <script src="ui.prescription.js" defer></script>
     <script src="utils.js" defer></script>
     <link href="index.css" rel="stylesheet">
   </head>
   <body>
-    <h1>Pills order</h1>
+    <h1 class="caption d-none"></h1>
+    <main>
+      <p class='message'>Loading...</p>
+      <section class="page"></section>
+    </main>
   </body>
 </html>

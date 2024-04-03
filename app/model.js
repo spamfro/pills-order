@@ -1,6 +1,7 @@
 class Prescription {
   constructor({ prescription, inventory }) {
-    this.items = prescription.map(take => new PrescriptionItem({ 
+    this.id = prescription.id;
+    this.items = prescription.items.map(take => new PrescriptionItem({ 
       product: take.product(),
       prescribedDoses: take.prescribedDoses(),
       availableDoses: inventory.get(take.product().id())?.availableDoses() ?? 0,

@@ -85,7 +85,7 @@ class PrescriptionsDataset {
         if (isValidRow) { 
           const row = new PrescriptionRow({ id, product, prescribedDoses });
           rows.push(row);
-          const items = index.get(id) ?? index.set(id, []).get(id);
+          const items = index.get(id)?.items ?? index.set(id, { id, items: [] }).get(id).items;
           items.push(row);
         }
       } catch {

@@ -61,7 +61,7 @@ app.datasets.inventory = new InventoryDataset({
 })
 ```
 
-### Build prescription model
+### Prescription model
 ```js
 prescription = new Prescription({
   prescription: app.datasets.prescriptions.index.get(1),
@@ -69,10 +69,14 @@ prescription = new Prescription({
 })
 ```
 
-### Prescription ui
+### Prescription UI
 ```js
 app.ui.prescription = document.createElement('x-prescription').render({ prescription })
-document.body.appendChild(app.ui.prescription)
+app.ui.render({ 
+  caption: `Prescription ${prescription.id}`,
+  message: '', 
+  page: app.ui.prescription
+})
 ```
 
 ## URLPattern web API
