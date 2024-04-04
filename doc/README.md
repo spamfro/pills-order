@@ -1,11 +1,6 @@
 # Pills order
 
-[NDC: Web Components An Introduction to the Future](https://www.youtube.com/watch?v=xCeutzpRlzA)  
-[MDN: Using templates and slots](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots)  
-[MDN: template](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template)  
-[MDN: table](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableElement)  
-[MDN: row](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableRowElement)  
-
+[Web components](./web-components.md)  
 
 ### Setup services
 ```js
@@ -79,7 +74,24 @@ app.ui.render({
 })
 ```
 
-## URLPattern web API
+### Router
+Unfortunately [Navigation web API](#navigation_web_api) is not widely supported yet.
+The next best thing is [History web API](https://developer.mozilla.org/en-US/docs/Web/API/History)  
+```js
+baseUrl = window.location.origin
+app.router = new Router([
+  new URLPattern('#prescriptions/:id/takes/:pid', baseUrl),
+  new URLPattern('#prescriptions/:id', baseUrl),
+])
+handleRouterNavigated = console.log.bind(console, 'router:navigated')
+app.router.addEventListener('router:navigated', handleRouterNavigated)
+
+window.location.assign('#prescriptions/1/takes/1')
+window.history.back()
+app.router.navigate(new URL('#prescriptions/1/takes/3', baseUrl))
+```
+
+## URLPattern web API (experimental)
 [MDN: URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URLPattern)  
 [URLPattern polyfill](https://www.npmjs.com/package/urlpattern-polyfill)  
 
@@ -95,4 +107,45 @@ pattern = new URLPattern({ hash: 'prescriptions/:id/takes/:pid' })
 url = 'https://local.spamfro.site:3443#prescriptions/1/takes/2'   // window.location.href
 console.log(pattern.test(url))
 console.log(pattern.exec(url)?.hash.groups)
+```
+### Events
+```js
+handlePopState = (...args) => { console.log('popstate', window.location.href, ...args) }
+window.addEventListener('popstate', handlePopState)
+removePopStateHandler = window.addEventListener.bind(window, 'popstate', handlePopState)
+
+window.location.assign('#prescriptions/1/takes/1')
+window.history.pushState({}, '', '#prescriptions/1/takes/2')  // NOTICE: won't trigger `popstate` event
+window.history.back()
+window.history.forward()
+```
+
+
+## <a name="navigation_web_api"></a>Navigation web API (experimental)
+[MDN: Navigation API](https://developer.mozilla.org/en-US/docs/Web/API/Navigation_API)  
+[WICG: Navigation API](https://github.com/WICG/navigation-api)  
+[Google: Modern client-side routing](https://developer.chrome.com/docs/web-platform/navigation-api/)  
+
+[MDN: Navigation web API browser support](https://developer.mozilla.org/en-US/docs/Web/API/Navigation_API#browser_compatibility)  
+
+```js
+handleNavigate = (e) => {
+  const currentUrl = window.location.href
+  const destinationurl = e.destination.url
+  e.intercept({
+    async handler() {
+      // render placeholder
+      // const data = await fetch(...)
+      // render data
+    }
+  })
+}
+navigation.addEventListener('navigate', handleNavigate)
+removeNavigateHandler = navigation.removeEventListener.bind(navigation, 'navigate', handleNavigate)
+
+window.location.assign('#prescriptions/1/takes/1')
+window.history.pushState({}, '', '#prescriptions/1/takes/2')
+window.history.back()
+window.history.forward()
+navigation.navigate('#prescriptions/1/takes/3')
 ```
