@@ -10,14 +10,22 @@ class App {
     
     const baseUrl = window.location.origin;
     this.router = new Router([
-      new URLPattern('#prescriptions/:id/takes/:pid', baseUrl),
-      new URLPattern('#prescriptions/:id', baseUrl),
+      { pattern: new URLPattern('#prescriptions/:id/takes/:pid', baseUrl),
+        handler: ({ hash: { groups } }) => { this.renderTake(groups) }
+      },
+      { pattern: new URLPattern('#prescriptions/:id', baseUrl),
+        handler: ({ hash: { groups } }) => { this.renderPrescription(groups) }
+      }
     ]);
-    this.router.addEventListener('router:navigated', ({ detail }) => { this.handleRouterNavigated(detail) });
+
+    this.router.match({ url: window.location.href, execute: true });
 
     return this;
   }
-  handleRouterNavigated(match) {
-    console.log('handleRouterNavigated', match);
+  renderTake({ id, pid }) {
+    console.log('take', { id, pid });
+  }
+  renderPrescription({ id }) {
+    console.log('prescription', { id });
   }
 }

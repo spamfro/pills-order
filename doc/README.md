@@ -80,15 +80,19 @@ The next best thing is [History web API](https://developer.mozilla.org/en-US/doc
 ```js
 baseUrl = window.location.origin
 app.router = new Router([
-  new URLPattern('#prescriptions/:id/takes/:pid', baseUrl),
-  new URLPattern('#prescriptions/:id', baseUrl),
+  { pattern: new URLPattern('#prescriptions/:id/takes/:pid', baseUrl),
+    handler: ({ hash: { groups } }) => { console.log('takes', groups) }
+  },
+  { pattern: new URLPattern('#prescriptions/:id', baseUrl),
+    handler: ({ hash: { groups } }) => { console.log('prescription', groups) }
+  }
 ])
-handleRouterNavigated = console.log.bind(console, 'router:navigated')
-app.router.addEventListener('router:navigated', handleRouterNavigated)
 
 window.location.assign('#prescriptions/1/takes/1')
 window.history.back()
+
 app.router.navigate(new URL('#prescriptions/1/takes/3', baseUrl))
+app.router.match({ url: window.location.href, execute: true })
 ```
 
 ## URLPattern web API (experimental)

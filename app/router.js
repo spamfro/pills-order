@@ -1,18 +1,22 @@
-class Router extends EventTarget {
-  constructor(patterns) {
-    super();
-    this.handleNavigated = (url) => {
-      const pattern = patterns.find(pattern=> pattern.test(url));
-      if (pattern) {
-        this.dispatchEvent(new CustomEvent('router:navigated', { detail: pattern.exec(url) }));
+class Router {
+  constructor(routes) {
+    this.match = ({ url, execute }) => {
+      const { pattern, handler } = routes.find(({ pattern })=> pattern.test(url)) ?? {};
+      const match = pattern?.exec(url);
+      if (execute) {
+        if (handler) {
+          handler(match);
+        }
+      } else {
+        return match;
       }
     };
     window.addEventListener('popstate', () => {
-      this.handleNavigated(window.location.href);
+      this.match({ url: window.location.href, execute: true });
     });
   }
   navigate(url) {
     window.history.pushState({}, '', url);
-    this.handleNavigated(url);
+    this.match({ url, execute: true });
   }
 }
