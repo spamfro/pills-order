@@ -43,23 +43,19 @@ class App {
   async renderPrescription({ id }) {
     const { prescriptions, inventory } = await this.fetchData();
 
-    const prescriptionPage = (prescription) => {
+    const prescriptionPage = () => {
+      const prescription = prescriptions.index.get(id);
       if (prescription) {
-        this.ui.prescription ||= document.createElement('x-prescription');
-        const model = new Prescription({
-          prescription, inventory: inventory.index,
+        return this.ui.prescriptionPage({ 
+          prescription: new Prescription({ prescription, inventory: inventory.index })
         });
-        return this.ui.prescription.render({ prescription: model });
       }
     };
-    const notFoundPage = () => (
-      document.querySelector('#page-not-found').content.cloneNode(true)
-    );
 
     this.ui.render({ 
       caption: `Prescription ${id}`,
       message: '', 
-      page: prescriptionPage(prescriptions.index.get(id)) ?? notFoundPage()
+      page: prescriptionPage() ?? this.ui.notFoundPage()
     });
   }
 

@@ -5,6 +5,19 @@ class Ui {
     this.message = { el: el.querySelector('p.message') };
     this.page = { el: el.querySelector('main section.page') };
   }
+
+  notFoundPage() {
+    this.notFoundLayout ||= document.importNode(document.querySelector('#page-not-found-layout').content, true);
+    return this.notFoundLayout;
+  }
+
+  prescriptionPage({ prescription }) {
+    this.prescriptionLayout ||= document.importNode(document.querySelector('#page-prescription-layout').content, true);
+    this.prescriptionLayout.querySelector('x-prescription')
+      .render({ prescription });
+    return this.prescriptionLayout;
+  }
+
   render({ caption, message, page }) {
     if (caption !== undefined) {
       const text = caption.toString();
