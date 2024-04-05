@@ -1,22 +1,11 @@
-window.addEventListener('load', () => { (window.app = new App()).init() });
+window.addEventListener('load', () => { window.app = new App() });
 
 class App {
   constructor() {
-    this.datasets = {};
+    this.services = new Services();
+
     this.ui = new Ui(document.body);
-  }
 
-  async init() {
-    this.services = await new Services().init();
-    this.initRouter();
-    
-    // render current route if any
-    this.router.match({ url: window.location.href, execute: true });
-
-    return this;
-  }
-  
-  initRouter() {
     const baseUrl = window.location.origin;
     this.router = new Router([
       { pattern: new URLPattern('#prescriptions/:id/takes/:pid', baseUrl),
@@ -32,6 +21,11 @@ class App {
     ]);
   }
 
+  async init() {
+    await this.services.init();
+    this.router.match({ url: window.location.href, execute: true });
+  }
+
   renderTake({ id, pid }) {
     this.ui.render({ 
       caption: `Prescription ${id} take product ${pid}`,
@@ -41,7 +35,9 @@ class App {
   }
 
   async renderPrescription({ id }) {
-    const { prescriptions, inventory } = await this.fetchData();
+    this.datasets = await this.fetchDatasets();
+
+    const { prescriptions, inventory } = this.datasets; 
 
     const prescriptionPage = () => {
       const prescription = prescriptions.index.get(id);
@@ -59,7 +55,7 @@ class App {
     });
   }
 
-  async fetchData() {
+  async fetchDatasets() {
     const [productsValues, prescriptionsValues, inventoryValues] = [
       this.services.products.fetch(),
       this.services.prescriptions.fetch(),

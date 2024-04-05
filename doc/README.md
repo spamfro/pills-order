@@ -1,18 +1,12 @@
 # Pills order
 
 [Web components](./web-components.md)  
+[URLPattern web API](./url-pattern.md)  
+[Navigation web API](./navigation.md)  
 
 ### Setup services
 ```js
-app.services = await new Services().init()
-```
-
-### Load products
-```js
-app.datasets.products = new ProductsDataset({
-  schema: Products.schema,
-  values: await app.services.products.fetch()
-})
+await app.services.init()
 ```
 
 ### Seed sample prescriptions
@@ -29,15 +23,6 @@ values = [
 await app.services.prescriptions.put(values)
 ```
 
-### Load prescriptions
-```js
-app.datasets.prescriptions = new PrescriptionsDataset({
-  schema: Prescriptions.schema,
-  values: await app.services.prescriptions.fetch(),
-  indeces: { products: app.datasets.products.index }
-})
-```
-
 ### Seed sample inventory
 ```js
 values = [
@@ -47,35 +32,33 @@ values = [
 await app.services.inventory.put(values)
 ```
 
-### Load inventory
+### Fetch datasets
 ```js
-app.datasets.inventory = new InventoryDataset({
-  schema: Inventory.schema,
-  values: await app.services.inventory.fetch(),
-  indeces: { products: app.datasets.products.index }
-})
-```
-
-### Prescription model
-```js
-prescription = new Prescription({
-  prescription: app.datasets.prescriptions.index.get(1),
-  inventory: app.datasets.inventory.index,
-})
+app.datasets = await app.fetchDatasets()
 ```
 
 ### Prescription UI
 ```js
-app.ui.prescription = document.createElement('x-prescription').render({ prescription })
-app.ui.render({ 
-  caption: `Prescription ${prescription.id}`,
-  message: '', 
-  page: app.ui.prescription
+page = document.importNode(document.querySelector('#page-prescription-layout').content, true)
+prescription = app.datasets.prescriptions.index.get(1)
+model = new Prescription({ prescription, inventory: app.datasets.inventory.index })
+page.querySelector('x-prescription').render({ prescription: model })
+app.ui.render({ page, caption: `Prescription ${prescription.id}`, message: '' })
+```
+
+### Take UI
+```js
+prescription = app.datasets.prescriptions.index.get(1)
+page = document.importNode(document.querySelector('#page-take-layout').content, true)
+page.querySelector('form') .addEventListener('submit', (e) => {
+  e.preventDefault()
+  console.log('take', { qty: parseInt(e.target.qty.value) })
 })
+app.ui.render({ page, caption: 'Take', message: '' })
 ```
 
 ### Router
-Unfortunately [Navigation web API](#navigation_web_api) is not widely supported yet.
+Unfortunately [Navigation web API](./navigation.md) is not widely supported yet.
 The next best thing is [History web API](https://developer.mozilla.org/en-US/docs/Web/API/History)  
 ```js
 baseUrl = window.location.origin
@@ -93,63 +76,4 @@ window.history.back()
 
 app.router.navigate(new URL('#prescriptions/1/takes/3', baseUrl))
 app.router.match({ url: window.location.href, execute: true })
-```
-
-## URLPattern web API (experimental)
-[MDN: URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URLPattern)  
-[URLPattern polyfill](https://www.npmjs.com/package/urlpattern-polyfill)  
-
-### Install polyfill
-```bash
-docker container exec -it --detach-keys 'ctrl-x' -u node node-app bash
-npm install urlpattern-polyfill
-tar -czC node_modules urlpattern-polyfill/index.js urlpattern-polyfill/dist/urlpattern.js | tar -xzvC app
-```
-### Test
-```js
-pattern = new URLPattern({ hash: 'prescriptions/:id/takes/:pid' })
-url = 'https://local.spamfro.site:3443#prescriptions/1/takes/2'   // window.location.href
-console.log(pattern.test(url))
-console.log(pattern.exec(url)?.hash.groups)
-```
-### Events
-```js
-handlePopState = (...args) => { console.log('popstate', window.location.href, ...args) }
-window.addEventListener('popstate', handlePopState)
-removePopStateHandler = window.addEventListener.bind(window, 'popstate', handlePopState)
-
-window.location.assign('#prescriptions/1/takes/1')
-window.history.pushState({}, '', '#prescriptions/1/takes/2')  // NOTICE: won't trigger `popstate` event
-window.history.back()
-window.history.forward()
-```
-
-
-## <a name="navigation_web_api"></a>Navigation web API (experimental)
-[MDN: Navigation API](https://developer.mozilla.org/en-US/docs/Web/API/Navigation_API)  
-[WICG: Navigation API](https://github.com/WICG/navigation-api)  
-[Google: Modern client-side routing](https://developer.chrome.com/docs/web-platform/navigation-api/)  
-
-[MDN: Navigation web API browser support](https://developer.mozilla.org/en-US/docs/Web/API/Navigation_API#browser_compatibility)  
-
-```js
-handleNavigate = (e) => {
-  const currentUrl = window.location.href
-  const destinationurl = e.destination.url
-  e.intercept({
-    async handler() {
-      // render placeholder
-      // const data = await fetch(...)
-      // render data
-    }
-  })
-}
-navigation.addEventListener('navigate', handleNavigate)
-removeNavigateHandler = navigation.removeEventListener.bind(navigation, 'navigate', handleNavigate)
-
-window.location.assign('#prescriptions/1/takes/1')
-window.history.pushState({}, '', '#prescriptions/1/takes/2')
-window.history.back()
-window.history.forward()
-navigation.navigate('#prescriptions/1/takes/3')
 ```

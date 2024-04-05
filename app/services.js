@@ -7,7 +7,6 @@ class Services {
     this.localDb = await localDb;
     this.inventory = new Inventory({ localDb: this.localDb });
     this.prescriptions = new Prescriptions({ localDb: this.localDb });
-    return this;
   }
 }
 

@@ -18,6 +18,11 @@ class Ui {
     return this.prescriptionLayout;
   }
 
+  takePage() {
+    this.takeLayout ||= document.importNode(document.querySelector('#page-take-layout').content, true);
+    return this.takeLayout;
+  }
+
   render({ caption, message, page }) {
     if (caption !== undefined) {
       const text = caption.toString();
