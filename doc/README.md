@@ -37,23 +37,29 @@ await app.services.inventory.put(values)
 app.datasets = await app.fetchDatasets()
 ```
 
+### Not Found UI
+```js
+app.ui.notFound ||= document.createElement('x-page-not-found')
+page = app.ui.notFound.render()
+app.ui.render({ page, caption: 'Page', message: '' })
+```
+
 ### Prescription UI
 ```js
-page = document.importNode(document.querySelector('#page-prescription-layout').content, true)
-prescription = app.datasets.prescriptions.index.get(1)
-model = new Prescription({ prescription, inventory: app.datasets.inventory.index })
-page.querySelector('x-prescription').render({ prescription: model })
-app.ui.render({ page, caption: `Prescription ${prescription.id}`, message: '' })
+app.ui.prescription ||= document.createElement('x-page-prescription')
+page = app.ui.prescription.render({
+  prescription: new Prescription({
+    prescription: app.datasets.prescriptions.index.get(1),
+    inventory: app.datasets.inventory.index
+  })
+})
+app.ui.render({ page, caption: 'Prescription', message: '' })
 ```
 
 ### Take UI
 ```js
-prescription = app.datasets.prescriptions.index.get(1)
-page = document.importNode(document.querySelector('#page-take-layout').content, true)
-page.querySelector('form') .addEventListener('submit', (e) => {
-  e.preventDefault()
-  console.log('take', { qty: parseInt(e.target.qty.value) })
-})
+app.ui.take ||= document.createElement('x-page-take')
+page = app.ui.take.render({ onSubmit: console.log.bind(console, 'take') })
 app.ui.render({ page, caption: 'Take', message: '' })
 ```
 

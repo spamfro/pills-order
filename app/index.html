@@ -10,28 +10,53 @@
     <script src="router.js" defer></script>
     <script src="services.js" defer></script>
     <script src="ui.js" defer></script>
+    <script src="ui.pages.js" defer></script>
     <script src="ui.prescription.js" defer></script>
     <script src="utils.js" defer></script>
     <link href="index.css" rel="stylesheet">
   </head>
+  
   <body>
     <h1 class="caption d-none"></h1>
     <main>
       <p class='message'>Loading...</p>
       <section class="page"></section>
     </main>
-    <template id="page-not-found-layout">
-      <h1>Not Found!</h1>
+
+    <template id="page-not-found">
+      <h2>Not Found!</h2>
     </template>
-    <template id="page-prescription-layout">
+
+    <template id="page-prescription">
       <x-prescription></x-prescription>
     </template>
-    <template id="page-take-layout">
+
+    <template id="page-take">
+      <style>
+        fieldset {
+          display: flex;
+          border: none;
+          margin: 10px 0px;
+          padding: 0px;
+        }
+        fieldset input {
+          flex: 1 1 auto;
+          margin: 0px 10px;
+        }
+        fieldset.action {
+          margin: 20px 0px;
+        }
+      </style>
       <form>
-        <label htmlFor='qty'>QTY</label>
-        <input type='text' name='qty' placeholder='Doses' />
-        <button type="submit">Update</button>
+        <fieldset>
+          <label htmlFor='prescribed-doses'>Prescribed Doses</label>
+          <input type='text' name='prescribedDoses' placeholder='Prescribed Doses' />
+        </fieldset>
+        <fieldset class="action">
+          <button type="submit">Update</button>
+        </fieldset>
       </form>
     </template>
+
   </body>
 </html>

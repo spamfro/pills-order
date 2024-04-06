@@ -23,36 +23,43 @@ class App {
 
   async init() {
     await this.services.init();
+    this.datasets = await this.fetchDatasets();
     this.router.match({ url: window.location.href, execute: true });
   }
 
   renderTake({ id, pid }) {
-    this.ui.render({ 
-      caption: `Prescription ${id} take product ${pid}`,
-      message: 'TBD', 
-      page: null
-    });
+    const { prescriptions } = this.datasets; 
+    
+    const prescription = prescriptions.index.get(id);
+    const take = prescription && prescription.items.find(item => item.product().id() === pid);
+    if (take) {
+      const page = this.ui.takePage({ 
+        prescribedDoses: take.prescribedDoses(), 
+        onSubmit: console.log.bind(console, 'take')
+      });
+      this.ui.render({ page, caption: 'Take', message: take.product().description() });
+
+    } else {
+      const page = this.ui.notFoundPage();
+      this.ui.render({ page, caption: 'Take', message: '' });
+    }
   }
 
-  async renderPrescription({ id }) {
-    this.datasets = await this.fetchDatasets();
-
+  renderPrescription({ id }) {
     const { prescriptions, inventory } = this.datasets; 
 
-    const prescriptionPage = () => {
-      const prescription = prescriptions.index.get(id);
-      if (prescription) {
-        return this.ui.prescriptionPage({ 
-          prescription: new Prescription({ prescription, inventory: inventory.index })
-        });
-      }
-    };
+    const prescription = prescriptions.index.get(id);
+    
+    if (prescription) {
+      const page = this.ui.prescriptionPage({
+        prescription: new Prescription({ prescription, inventory: inventory.index })
+      });
+      app.ui.render({ page, caption: `Prescription ${id}`, message: '' });
 
-    this.ui.render({ 
-      caption: `Prescription ${id}`,
-      message: '', 
-      page: prescriptionPage() ?? this.ui.notFoundPage()
-    });
+    } else {
+      const page = this.ui.notFoundPage();
+      app.ui.render({ page, caption: 'Prescription', message: '' });
+    }
   }
 
   async fetchDatasets() {

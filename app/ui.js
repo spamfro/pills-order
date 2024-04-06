@@ -6,21 +6,19 @@ class Ui {
     this.page = { el: el.querySelector('main section.page') };
   }
 
-  notFoundPage() {
-    this.notFoundLayout ||= document.importNode(document.querySelector('#page-not-found-layout').content, true);
-    return this.notFoundLayout;
+  notFoundPage(options) {
+    this.notFound ||= document.createElement('x-page-not-found');
+    return this.notFound.render(options);
   }
 
-  prescriptionPage({ prescription }) {
-    this.prescriptionLayout ||= document.importNode(document.querySelector('#page-prescription-layout').content, true);
-    this.prescriptionLayout.querySelector('x-prescription')
-      .render({ prescription });
-    return this.prescriptionLayout;
+  prescriptionPage(options) {
+    this.prescription ||= document.createElement('x-page-prescription');
+    return this.prescription.render(options);
   }
 
-  takePage() {
-    this.takeLayout ||= document.importNode(document.querySelector('#page-take-layout').content, true);
-    return this.takeLayout;
+  takePage(options) {
+    app.ui.take ||= document.createElement('x-page-take');
+    return app.ui.take.render(options);
   }
 
   render({ caption, message, page }) {
