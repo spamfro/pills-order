@@ -17,6 +17,9 @@ class App {
         handler: ({ hash: { groups: { id } } }) => { 
           this.renderPrescription({ id: parseInt(id) });
         }
+      },
+      { pattern: new URLPattern('#*', baseUrl),
+        handler: () => { this.renderNotFound() }
       }
     ]);
   }
@@ -25,6 +28,11 @@ class App {
     await this.services.init();
     this.datasets = await this.fetchDatasets();
     this.router.match({ url: window.location.href, execute: true });
+  }
+
+  renderNotFound() {
+    const page = this.ui.notFoundPage();
+    this.ui.render({ page, caption: '', message: '' });
   }
 
   renderTake({ id, pid }) {
@@ -40,8 +48,7 @@ class App {
       this.ui.render({ page, caption: 'Take', message: take.product().description() });
 
     } else {
-      const page = this.ui.notFoundPage();
-      this.ui.render({ page, caption: 'Take', message: '' });
+      this.renderNotFound();
     }
   }
 
@@ -57,8 +64,7 @@ class App {
       app.ui.render({ page, caption: `Prescription ${id}`, message: '' });
 
     } else {
-      const page = this.ui.notFoundPage();
-      app.ui.render({ page, caption: 'Prescription', message: '' });
+      this.renderNotFound();
     }
   }
 
