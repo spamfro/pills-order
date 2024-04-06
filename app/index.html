@@ -31,28 +31,22 @@
       <x-prescription></x-prescription>
     </template>
 
-    <template id="page-take">
+    <template id="page-inventory">
       <style>
         fieldset {
           display: flex;
           border: none;
-          margin: 10px 0px;
+          margin-top: 1em;
           padding: 0px;
-        }
-        fieldset input {
-          flex: 1 1 auto;
-          margin: 0px 10px;
-        }
-        fieldset.action {
-          margin: 20px 0px;
+          gap: 10px;
         }
       </style>
       <form>
         <fieldset>
-          <label htmlFor='prescribed-doses'>Prescribed Doses</label>
-          <input type='text' name='prescribedDoses' placeholder='Prescribed Doses' />
+          <label htmlFor='doses'>Doses:</label>
+          <input type='text' name='doses' placeholder="Available doses"/>
         </fieldset>
-        <fieldset class="action">
+        <fieldset>
           <button type="submit">Update</button>
         </fieldset>
       </form>

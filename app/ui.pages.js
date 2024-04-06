@@ -30,25 +30,25 @@ class PrescriptionPage extends HTMLElement {
   }
 }
 
-class TakePage extends HTMLElement {
+class InventoryPage extends HTMLElement {
   static registerCustomElement() {
-    TakePage.template = document.querySelector('#page-take');
-    window.customElements.define('x-page-take', TakePage);
+    InventoryPage.template = document.querySelector('#page-inventory');
+    window.customElements.define('x-page-inventory', InventoryPage);
   }
   constructor() {
     super();
-    const fragment = document.importNode(TakePage.template.content, true);
+    const fragment = document.importNode(InventoryPage.template.content, true);
     this.form = fragment.querySelector('form');
     this.attachShadow({ mode: 'open' }).appendChild(fragment);
   }
-  render({ prescribedDoses, onSubmit } = {}) {
-    if (prescribedDoses !== undefined) {
-      this.form.prescribedDoses.value = parseInt(prescribedDoses.toString());
+  render({ doses, onSubmit } = {}) {
+    if (doses !== undefined) {
+      this.form.doses.value = parseInt(doses.toString());
     }
     if (onSubmit !== undefined) {
       function handleSubmit(e) {
         e.preventDefault();
-        onSubmit({ prescribedDoses: parseInt(e.target.prescribedDoses.value) });
+        onSubmit({ doses: parseInt(e.target.doses.value) });
       }
       if (this.removeSubmitHandler) { this.removeSubmitHandler() }
       this.removeSubmitHandler = this.form.removeEventListener.bind(this.form, 'submit', handleSubmit);
@@ -58,4 +58,4 @@ class TakePage extends HTMLElement {
   }
 }
 
-[NotFoundPage, PrescriptionPage, TakePage].forEach(x => x.registerCustomElement());
+[NotFoundPage, PrescriptionPage, InventoryPage].forEach(x => x.registerCustomElement());

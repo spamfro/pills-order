@@ -8,14 +8,14 @@ class App {
 
     const baseUrl = window.location.origin;
     this.router = new Router([
-      { pattern: new URLPattern('#prescriptions/:id/takes/:pid', baseUrl),
+      { pattern: new URLPattern('#prescriptions/:id/inventory/:pid', baseUrl),
         handler: ({ hash: { groups: { id, pid } } }) => { 
-          this.renderTake({ id: parseInt(id), pid: parseInt(pid) });
+          this.renderInventory({ prescriptionId: parseInt(id), productId: parseInt(pid) });
         }
       },
       { pattern: new URLPattern('#prescriptions/:id', baseUrl),
         handler: ({ hash: { groups: { id } } }) => { 
-          this.renderPrescription({ id: parseInt(id) });
+          this.renderPrescription({ prescriptionId: parseInt(id) });
         }
       },
       { pattern: new URLPattern('#*', baseUrl),
@@ -35,33 +35,35 @@ class App {
     this.ui.render({ page, caption: '', message: '' });
   }
 
-  renderTake({ id, pid }) {
-    const { prescriptions } = this.datasets; 
+  renderInventory({ prescriptionId, productId }) {
+    const { products, inventory } = this.datasets; 
     
-    const prescription = prescriptions.index.get(id);
-    const take = prescription && prescription.items.find(item => item.product().id() === pid);
-    if (take) {
-      const page = this.ui.takePage({ 
-        prescribedDoses: take.prescribedDoses(), 
-        onSubmit: console.log.bind(console, 'take')
-      });
-      this.ui.render({ page, caption: 'Take', message: take.product().description() });
+    const product = products.index.get(productId);
+    if (product) {
+      const row = inventory.rows.find(row => row.product().id() === product.id());
+      const availableDoses = row?.availableDoses() ?? 0;
+      const handleSubmit = ({ doses }) => {
+        inventory.put({ product, availableDoses: doses });
+        this.router.navigate(new URL(`#prescriptions/${prescriptionId}`, window.location.origin));
+      };
+      const page = this.ui.inventoryPage({ doses: availableDoses, onSubmit: handleSubmit });
+      this.ui.render({ page, caption: 'Inventory', message: product.description() });
 
     } else {
       this.renderNotFound();
     }
   }
 
-  renderPrescription({ id }) {
+  renderPrescription({ prescriptionId }) {
     const { prescriptions, inventory } = this.datasets; 
 
-    const prescription = prescriptions.index.get(id);
+    const prescription = prescriptions.index.get(prescriptionId);
     
     if (prescription) {
       const page = this.ui.prescriptionPage({
         prescription: new Prescription({ prescription, inventory: inventory.index })
       });
-      app.ui.render({ page, caption: `Prescription ${id}`, message: '' });
+      app.ui.render({ page, caption: `Prescription ${prescriptionId}`, message: '' });
 
     } else {
       this.renderNotFound();

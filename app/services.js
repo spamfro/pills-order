@@ -6,7 +6,8 @@ class Services {
     const [localDb] = [new LocalDb({ indexedDB: window.indexedDB }).open()];  // start all
     this.localDb = await localDb;
     this.inventory = new Inventory({ localDb: this.localDb });
-    this.prescriptions = new Prescriptions({ localDb: this.localDb });
+    this.prescriptions = new Prescriptions();
+    // this.prescriptions = new Prescriptions({ localDb: this.localDb });
   }
 }
 
@@ -28,7 +29,7 @@ class LocalDb {
   }
   async open() {
     const upgrade = (db, { oldVersion, newVersion }) => {
-      db.createObjectStore('Prescriptions'); // out-of-line key
+      // db.createObjectStore('Prescriptions'); // out-of-line key
       db.createObjectStore('Inventory'); // out-of-line key
     };
     this.db = await new Promise((resolve, reject) => {
@@ -43,28 +44,40 @@ class LocalDb {
 
 class Prescriptions {
   static schema = ['ID', 'PID', 'QTY'];
-  constructor({ localDb }) {
-    this.localDb = localDb;
-  }
   async fetch() {
-    return new Promise((resolve, reject) => {
-      const tr = this.localDb.db.transaction(['Prescriptions'], 'readonly');
-      tr.onerror = () => { reject(tr.error) };
-      const store = tr.objectStore('Prescriptions');
-      const req = store.getAll();
-      req.onsuccess = () => { resolve(req.result) };
-    });
-  }
-  async put(values) {
-    return new Promise((resolve, reject) => {
-      const tr = this.localDb.db.transaction(['Prescriptions'], 'readwrite');
-      tr.onerror = () => { reject(tr.error) };
-      tr.oncomplete = () => { resolve() };
-      const store = tr.objectStore('Prescriptions');
-      values.forEach(([ID, PID, QTY]) => { store.put([ID, PID, QTY], [ID, PID]) });
-    });
+    return fetch('data/prescriptions.json')
+      .then(response => {
+        const { url, status, statusText } = response;
+        if (!response.ok) { throw Error(`${url} ${status} (${statusText})`) }
+        return response.json();
+      });
   }
 }
+
+// class Prescriptions {
+//   static schema = ['ID', 'PID', 'QTY'];
+//   constructor({ localDb }) {
+//     this.localDb = localDb;
+//   }
+//   async fetch() {
+//     return new Promise((resolve, reject) => {
+//       const tr = this.localDb.db.transaction(['Prescriptions'], 'readonly');
+//       tr.onerror = () => { reject(tr.error) };
+//       const store = tr.objectStore('Prescriptions');
+//       const req = store.getAll();
+//       req.onsuccess = () => { resolve(req.result) };
+//     });
+//   }
+//   async put(values) {
+//     return new Promise((resolve, reject) => {
+//       const tr = this.localDb.db.transaction(['Prescriptions'], 'readwrite');
+//       tr.onerror = () => { reject(tr.error) };
+//       tr.oncomplete = () => { resolve() };
+//       const store = tr.objectStore('Prescriptions');
+//       values.forEach(([ID, PID, QTY]) => { store.put([ID, PID, QTY], [ID, PID]) });
+//     });
+//   }
+// }
 
 class Inventory {
   static schema = ['PID', 'QTY'];

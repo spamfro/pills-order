@@ -45,8 +45,7 @@ class InventoryDataset {
         const productId = parseInt(value[schema.get('PID')]);
         const product = productId && products.get(productId);
         const availableDoses = parseInt(value[schema.get('QTY')]);
-        const isValidRow = !!product && availableDoses >= 0;
-        if (isValidRow) { 
+        if (this.isValidRow({ product, availableDoses })) { 
           const row = new InventoryRow({ product, availableDoses });
           rows.push(row);
           index.set(productId, row);
@@ -59,6 +58,24 @@ class InventoryDataset {
     this.rows = rows;
     this.index = index;
   }
+
+  isValidRow({ product, availableDoses }) {
+    return !!product && availableDoses >= 0;  
+  }
+  
+  put({ product, availableDoses }) {
+    if (this.isValidRow({ product, availableDoses })) { 
+      const row = this.index.get(product.id());
+      if (row) {
+        row.setAvailableDoses(availableDoses);
+
+      } else {
+        const row = new InventoryRow({ product, availableDoses });
+        this.rows.push(row);
+        this.index.set(product.id(), row);
+      }
+    }
+  }
 }
 
 class InventoryRow extends Array {
@@ -67,6 +84,7 @@ class InventoryRow extends Array {
   }
   product() { return this[0] }
   availableDoses() { return this[1] }
+  setAvailableDoses(value) { this[1] = parseInt(value) }
 }
 
 class PrescriptionsDataset {

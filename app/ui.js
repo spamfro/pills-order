@@ -15,9 +15,9 @@ class Ui {
     return this.prescription.render(options);
   }
 
-  takePage(options) {
-    app.ui.take ||= document.createElement('x-page-take');
-    return app.ui.take.render(options);
+  inventoryPage(options) {
+    app.ui.inventory ||= document.createElement('x-page-inventory');
+    return app.ui.inventory.render(options);
   }
 
   render({ caption, message, page }) {

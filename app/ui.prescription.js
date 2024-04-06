@@ -13,8 +13,8 @@ class PrescriptionElement extends HTMLElement {
           text-align: left;
         }
         .dpu, .qty {
-          min-width: 100px;
           text-align: right;
+          padding-left: 1em;
         }
       </style>
       <table>
@@ -75,9 +75,9 @@ class PrescriptionElement extends HTMLElement {
 
       const values = new Map([
         ['DESCR', 'Description'],
-        ['DPU', 'Doses<br/> per unit'],
-        ['PQTY', 'Prescribed<br/> doses'],
-        ['AQTY', 'Available<br/> doses'],
+        ['DPU', 'Unit'],
+        ['PQTY', 'Prescr.'],
+        ['AQTY', 'Avail.'],
       ]);
       const colClassNames = new Map([
         ['DESCR', ['descr']],
@@ -87,9 +87,9 @@ class PrescriptionElement extends HTMLElement {
       ]);
       Array.from(this.table.tHead.rows[0].cells)
         .map((th, colIndex) => [th, values.get(header[colIndex]), colClassNames.get(header[colIndex])])
-        .forEach(([th, html, classNames]) => {
+        .forEach(([th, text, classNames]) => {
           if (classNames) { th.classList.add(...classNames) }
-          th.innerHTML = html;
+          th.textContent = text;
         });
     }
     return this;
