@@ -3,6 +3,12 @@ class PrescriptionElement extends HTMLElement {
     PrescriptionElement.table = document.createElement('template');
     PrescriptionElement.table.innerHTML = `
       <style>
+        table {
+          border-spacing: 0px;
+        }
+        thead th {
+          border-bottom: solid;
+        }
         .descr {
           text-align: left;
         }
@@ -67,6 +73,12 @@ class PrescriptionElement extends HTMLElement {
       });
       this.table.tBodies[0].replaceChildren(...rows);
 
+      const values = new Map([
+        ['DESCR', 'Description'],
+        ['DPU', 'Doses<br/> per unit'],
+        ['PQTY', 'Prescribed<br/> doses'],
+        ['AQTY', 'Available<br/> doses'],
+      ]);
       const colClassNames = new Map([
         ['DESCR', ['descr']],
         ['DPU', ['dpu']],
@@ -74,10 +86,10 @@ class PrescriptionElement extends HTMLElement {
         ['AQTY', ['qty']],
       ]);
       Array.from(this.table.tHead.rows[0].cells)
-        .map((th, colIndex) => [th, header[colIndex], colClassNames.get(header[colIndex])])
-        .forEach(([th, text, classNames]) => {
+        .map((th, colIndex) => [th, values.get(header[colIndex]), colClassNames.get(header[colIndex])])
+        .forEach(([th, html, classNames]) => {
           if (classNames) { th.classList.add(...classNames) }
-          th.textContent = text;
+          th.innerHTML = html;
         });
     }
     return this;

@@ -1,4 +1,4 @@
-window.addEventListener('load', () => { window.app = new App() });
+window.addEventListener('load', () => { (window.app = new App()).init() });
 
 class App {
   constructor() {
