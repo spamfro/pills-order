@@ -18,7 +18,6 @@ values = [
   { ID: 1, PID: 4, QTY: 60 },
   { ID: 1, PID: 5, QTY: 30 },
   { ID: 1, PID: 6, QTY: 9 },
-  { ID: 1, PID: 6, QTY: 2 },
 ].map(({ ID, PID, QTY }) => [ID, PID, QTY])  // TODO: ref schema
 await app.services.prescriptions.put(values)
 ```
