@@ -8,18 +8,18 @@ class App {
 
     const baseUrl = window.location.origin;
     this.router = new Router([
-      { pattern: new URLPattern('#prescriptions/:id/inventory/:pid', baseUrl),
+      { pattern: new URLPattern('#prescriptions/:id(\\d+)/inventory/:pid(\\d+)', baseUrl),
         handler: ({ hash: { groups: { id, pid } } }) => { 
           this.renderInventory({ prescriptionId: parseInt(id), productId: parseInt(pid) });
         }
       },
-      { pattern: new URLPattern('#prescriptions/:id', baseUrl),
+      { pattern: new URLPattern('#prescriptions/:id(\\d+)', baseUrl),
         handler: ({ hash: { groups: { id } } }) => { 
           this.renderPrescription({ prescriptionId: parseInt(id) });
         }
       },
-      { pattern: new URLPattern('#*', baseUrl),
-        handler: () => { this.renderNotFound() }
+      { pattern: new URLPattern('*', baseUrl),
+        handler: () => { this.router.navigate(new URL('#prescriptions/1', baseUrl)) }  // TODO
       }
     ]);
   }
@@ -30,9 +30,9 @@ class App {
     this.router.match({ url: window.location.href, execute: true });
   }
 
-  renderNotFound() {
+  renderNotFound({ caption = '', message = ''} = {}) {
     const page = this.ui.notFoundPage();
-    this.ui.render({ page, caption: '', message: '' });
+    this.ui.render({ page, caption, message });
   }
 
   renderInventory({ prescriptionId, productId }) {
@@ -51,7 +51,7 @@ class App {
       this.ui.render({ page, caption: 'Inventory', message: product.description() });
 
     } else {
-      this.renderNotFound();
+      this.renderNotFound({ caption: 'Inventory' });
     }
   }
 
@@ -67,7 +67,7 @@ class App {
       app.ui.render({ page, caption: `Prescription ${prescriptionId}`, message: '' });
 
     } else {
-      this.renderNotFound();
+      this.renderNotFound({ caption: `Prescription ${prescriptionId}` });
     }
   }
 
