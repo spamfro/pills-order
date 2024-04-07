@@ -61,8 +61,12 @@ class App {
     const prescription = prescriptions.index.get(prescriptionId);
     
     if (prescription) {
+      const handleClick = ({ pid }) => {
+        this.router.navigate(new URL(`#prescriptions/${prescriptionId}/inventory/${pid}`, window.location.origin));
+      };
       const page = this.ui.prescriptionPage({
-        prescription: new Prescription({ prescription, inventory: inventory.index })
+        prescription: new Prescription({ prescription, inventory: inventory.index }),
+        onClick: handleClick
       });
       app.ui.render({ page, caption: `Prescription ${prescriptionId}`, message: '' });
 

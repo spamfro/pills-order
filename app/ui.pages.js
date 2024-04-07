@@ -24,8 +24,8 @@ class PrescriptionPage extends HTMLElement {
     this.prescription = fragment.querySelector('x-prescription');
     this.attachShadow({ mode: 'open' }).appendChild(fragment);
   }
-  render({ prescription } = {}) {
-    this.prescription.render({ prescription });
+  render(options) {
+    this.prescription.render(options);
     return this;
   }
 }

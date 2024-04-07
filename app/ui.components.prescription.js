@@ -47,8 +47,28 @@ class PrescriptionElement extends HTMLElement {
     this.table = shadowRoot.querySelector('table');
   }
 
-  render({ prescription }) {
+  render({ prescription, onClick }) {
     const header = ['DESCR', 'DPU', 'PQTY', 'AQTY'];
+    this.renderPrescription({ header, prescription });
+    this.renderHandlers({ header, onClick });
+    return this;
+  }
+  renderHandlers({ header, onClick }) {
+    if (onClick !== undefined) {
+      function handleClick(e) {
+        if (e.target instanceof HTMLTableCellElement) {
+          const col = header[e.target.cellIndex];
+          const { pid } = e.target.parentElement.dataset;
+          onClick({ col, pid });
+        }
+      }
+      if (this.removeClickHandler) { this.removeClickHandler() }
+      const tBody = this.table.tBodies[0];
+      this.removeClickHandler = tBody.removeEventListener.bind(tBody, 'click', handleClick);
+      tBody.addEventListener('click', handleClick);
+    }
+  }
+  renderPrescription({ header, prescription }) {
     if (prescription) {
       const rows = prescription.items.map(item => {
         const values = new Map([
@@ -69,10 +89,11 @@ class PrescriptionElement extends HTMLElement {
             if (classNames) { td.classList.add(...classNames) }
             td.textContent = text;
           });
+        row.querySelector('tr').dataset.pid = item.product().id();
         return row;
       });
       this.table.tBodies[0].replaceChildren(...rows);
-
+    
       const values = new Map([
         ['DESCR', 'Description'],
         ['DPU', 'Unit'],
@@ -92,7 +113,6 @@ class PrescriptionElement extends HTMLElement {
           th.textContent = text;
         });
     }
-    return this;
   }
 }
 
