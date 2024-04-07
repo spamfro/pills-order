@@ -13,6 +13,11 @@ class App {
           this.renderInventory({ prescriptionId: parseInt(id), productId: parseInt(pid) });
         }
       },
+      { pattern: new URLPattern('#prescriptions/:id(\\d+)/order', baseUrl),
+        handler: ({ hash: { groups: { id } } }) => { 
+          this.renderOrder({ prescriptionId: parseInt(id) });
+        }
+      },
       { pattern: new URLPattern('#prescriptions/:id(\\d+)', baseUrl),
         handler: ({ hash: { groups: { id } } }) => { 
           this.renderPrescription({ prescriptionId: parseInt(id) });
@@ -55,6 +60,22 @@ class App {
     }
   }
 
+  renderOrder({ prescriptionId }) {
+    const { prescriptions, inventory } = this.datasets; 
+
+    const prescription = prescriptions.index.get(prescriptionId);
+    
+    if (prescription) {
+      const page = this.ui.orderPage({
+        order: new Order({ prescription, inventory: inventory.index })
+      });
+      app.ui.render({ page, caption: 'Order', message: '' });
+
+    } else {
+      this.renderNotFound({ caption: `Prescription ${prescriptionId}` });
+    }
+  }
+
   renderPrescription({ prescriptionId }) {
     const { prescriptions, inventory } = this.datasets; 
 
@@ -64,9 +85,13 @@ class App {
       const handleClick = ({ pid }) => {
         this.router.navigate(new URL(`#prescriptions/${prescriptionId}/inventory/${pid}`, window.location.origin));
       };
+      const handleSubmit = () => {
+        this.router.navigate(new URL(`#prescriptions/${prescriptionId}/order`, window.location.origin));
+      };
       const page = this.ui.prescriptionPage({
         prescription: new Prescription({ prescription, inventory: inventory.index }),
-        onClick: handleClick
+        onClick: handleClick,
+        onSubmit: handleSubmit
       });
       app.ui.render({ page, caption: `Prescription ${prescriptionId}`, message: '' });
 

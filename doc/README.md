@@ -62,6 +62,18 @@ page = app.ui.take.render({ onSubmit: console.log.bind(console, 'take') })
 app.ui.render({ page, caption: 'Take', message: '' })
 ```
 
+### Order UI
+```js
+app.ui.order ||= document.createElement('x-page-order')
+page = app.ui.order.render({
+  order: new Order({
+    prescription: app.datasets.prescriptions.index.get(1),
+    inventory: app.datasets.inventory.index
+  })
+})
+app.ui.render({ page, caption: 'Order', message: '' })
+```
+
 ### Router
 Unfortunately [Navigation web API](./navigation.md) is not widely supported yet.
 The next best thing is [History web API](https://developer.mozilla.org/en-US/docs/Web/API/History)  

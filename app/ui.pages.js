@@ -21,11 +21,21 @@ class PrescriptionPage extends HTMLElement {
   constructor() {
     super();
     const fragment = document.importNode(PrescriptionPage.template.content, true);
+    this.form = fragment.querySelector('form');
     this.prescription = fragment.querySelector('x-prescription');
     this.attachShadow({ mode: 'open' }).appendChild(fragment);
   }
-  render(options) {
+  render({ onSubmit, ...options}) {
     this.prescription.render(options);
+    if (onSubmit !== undefined) {
+      function handleSubmit(e) {
+        e.preventDefault();
+        onSubmit();
+      }
+      if (this.removeSubmitHandler) { this.removeSubmitHandler() }
+      this.removeSubmitHandler = this.form.removeEventListener.bind(this.form, 'submit', handleSubmit);
+      this.form.addEventListener('submit', handleSubmit);
+    }
     return this;
   }
 }
@@ -58,4 +68,21 @@ class InventoryPage extends HTMLElement {
   }
 }
 
-[NotFoundPage, PrescriptionPage, InventoryPage].forEach(x => x.registerCustomElement());
+class OrderPage extends HTMLElement {
+  static registerCustomElement() {
+    OrderPage.template = document.querySelector('#page-order');
+    window.customElements.define('x-page-order', OrderPage);
+  }
+  constructor() {
+    super();
+    const fragment = document.importNode(OrderPage.template.content, true);
+    this.order = fragment.querySelector('x-order');
+    this.attachShadow({ mode: 'open' }).appendChild(fragment);
+  }
+  render(options) {
+    this.order.render(options);
+    return this;
+  }
+}
+
+[NotFoundPage, PrescriptionPage, InventoryPage, OrderPage].forEach(x => x.registerCustomElement());

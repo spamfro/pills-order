@@ -20,6 +20,11 @@ class Ui {
     return app.ui.inventory.render(options);
   }
 
+  orderPage(options) {
+    this.order ||= document.createElement('x-page-order');
+    return this.order.render(options);
+  }
+
   render({ caption, message, page }) {
     if (caption !== undefined) {
       const text = caption.toString();
