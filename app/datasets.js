@@ -57,6 +57,7 @@ class InventoryDataset {
     this.schema = schema;
     this.rows = rows;
     this.index = index;
+    this.dirty = new Map();
   }
 
   isValidRow({ product, availableDoses }) {
@@ -65,15 +66,34 @@ class InventoryDataset {
   
   put({ product, availableDoses }) {
     if (this.isValidRow({ product, availableDoses })) { 
-      const row = this.index.get(product.id());
+      let row = this.index.get(product.id());
       if (row) {
         row.setAvailableDoses(availableDoses);
 
       } else {
-        const row = new InventoryRow({ product, availableDoses });
+        row = new InventoryRow({ product, availableDoses });
         this.rows.push(row);
         this.index.set(product.id(), row);
       }
+      this.dirty.set(product.id(), row);
+    }
+  }
+
+  commit({ persist } = {}) {
+    if (this.dirty.size > 0) {
+      if (persist) {
+        const n = Math.max(...this.schema.values()) + 1;
+        const values = [];
+        for (const row of this.dirty.values()) {
+          const value = Array(n);
+          [ ['PID', row.product().id()],
+            ['QTY', row.availableDoses()],
+          ].forEach(([col, newVal]) => { value[this.schema.get(col)] = newVal });
+          values.push(value);
+        }
+        persist(values);
+      }
+      this.dirty = new Map();
     }
   }
 }

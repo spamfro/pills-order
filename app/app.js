@@ -44,6 +44,7 @@ class App {
       const availableDoses = row?.availableDoses() ?? 0;
       const handleSubmit = ({ doses }) => {
         inventory.put({ product, availableDoses: doses });
+        inventory.commit({ persist: this.services.inventory.put.bind(this.services.inventory) });
         this.router.navigate(new URL(`#prescriptions/${prescriptionId}`, window.location.origin));
       };
       const page = this.ui.inventoryPage({ doses: availableDoses, onSubmit: handleSubmit });
